@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_prectice_project/note_model.dart';
 
 class DbHelper {
 
@@ -9,7 +10,7 @@ class DbHelper {
 
   /// table column of var
   static final String TABLE_NOTE = "note";
-  static final String NOTE_COLUMN_ID = "s_no";
+  static late String NOTE_COLUMN_ID = "s_no";
   static final String NOTE_COLUMN_TITLE = "n_title";
   static final String NOTE_COLUMN_DESC = "n_desc";
   static final String NOTE_COLUMN_CREATE_AT = "n_crate_at";
@@ -41,13 +42,10 @@ class DbHelper {
         db.execute("create table $TABLE_NOTE ($NOTE_COLUMN_ID integer primary key autoincrement, $NOTE_COLUMN_TITLE text, $NOTE_COLUMN_DESC text, $NOTE_COLUMN_CREATE_AT text) ");
     });
   }
-  Future<bool> addNote({required String title, required String desc}) async{
+  Future<bool> addNote(NoteModel newNote) async{
     Database db = await initDB();
-    int rowsEffect = await db.insert(TABLE_NOTE, {
-      NOTE_COLUMN_TITLE : title,
-      NOTE_COLUMN_DESC : desc,
-      NOTE_COLUMN_CREATE_AT : DateTime.now().millisecondsSinceEpoch.toString()
-    });
+    int rowsEffect = await db.insert(TABLE_NOTE, newNote.toMap()
+    );
     return rowsEffect>0;
     // if(rowsEffect>0){
     //   return true;
@@ -55,10 +53,16 @@ class DbHelper {
     //   return false;
     // }
   }
-  Future<List<Map<String, dynamic>>> fetchAllNote() async{
+  Future<List<NoteModel>> fetchAllNote() async{
     Database db = await initDB();
+    List<NoteModel> mNotes = [];
     List<Map<String, dynamic>> allNote = await db.query(TABLE_NOTE);
-    return allNote;
+
+    for(Map<String, dynamic> eachData in allNote) {
+      NoteModel eachNote = NoteModel.formMap(eachData);
+      mNotes.add(eachNote);
+    }
+    return mNotes;
   }
   Future<bool> editeDataNote({required String title, required String desce, required int id}) async{
     Database db = await initDB();
@@ -68,9 +72,9 @@ class DbHelper {
     }, where: '$NOTE_COLUMN_ID = $id');
     return update>0;
   }
-  Future<bool>deleteDataNote({required int id})async{
+  deleteDataNote({required dynamic id})async{
     Database db = await initDB();
-    int rowsEffect = await db.delete(TABLE_NOTE, where: NOTE_COLUMN_ID, whereArgs: ["$id"]);
+    int rowsEffect = await db.delete(TABLE_NOTE, where: '$NOTE_COLUMN_ID = $id');
     return rowsEffect > 0;
   }
 }

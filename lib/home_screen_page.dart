@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_prectice_project/db_helper.dart';
+import 'package:sqflite_prectice_project/note_model.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -9,7 +10,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   DbHelper dbHelper = DbHelper.getInstance();
-  List<Map<String, dynamic>> mData = [];
+  List<NoteModel> mData = [];
   @override
   void initState() {
     super.initState();
@@ -39,11 +40,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: const TextStyle(fontSize: 10),
                   ),
                   title: Text(
-                    mData[index]['n_title'],
+                    mData[index].title,
                     style: const TextStyle(fontSize: 10),
                   ),
                   subtitle: Text(
-                    mData[index]["n_desc"],
+                    mData[index].desc,
                     style: const TextStyle(fontSize: 10),
                   ),
                   trailing: SizedBox(
@@ -52,8 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         InkWell(
                             onTap: () {
-                              titleController.text = mData[index]['n_title'];
-                              descController.text = mData[index]['n_desc'];
+                              titleController.text = mData[index].title;
+                              descController.text = mData[index].desc;
                               showModalBottomSheet(
                                   shape: const RoundedRectangleBorder(
                                       borderRadius: BorderRadius.vertical(
@@ -64,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   builder: (_) {
                                     return bottomSheetPage(
                                         isUpdate: true,
-                                        nId: mData[index]['s_no']);
+                                        nId: mData[index].id!);
                                   });
                             },
                             child: const Icon(
@@ -73,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             )),
                         InkWell(
                           onTap: () async{
-                            bool check = await dbHelper.deleteDataNote(id: mData[index]['s_no']);
+                            bool check = await dbHelper.deleteDataNote(id: mData[index].id!);
                             if(check){
                               getNote();
                             }
@@ -173,9 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             .showSnackBar(const SnackBar(content: Text("Error: Is note not update!!!"),));
                           }
                         } else {
-                          bool check = await dbHelper.addNote(
-                              title: titleController.text.toString(),
-                              desc: descController.text.toString());
+                          bool check = await dbHelper.addNote(NoteModel(title: titleController.text, desc: descController.text, creatat: DateTime.now().millisecondsSinceEpoch.toString()));
                           if (check) {
                             getNote();
                             Navigator.pop(context);
