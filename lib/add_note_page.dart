@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_prectice_project/db_provider.dart';
-import 'package:sqflite_prectice_project/main.dart';
+// import 'package:sqflite_prectice_project/main.dart';
 
 import 'db_helper.dart';
 import 'note_model.dart';
